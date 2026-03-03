@@ -26,7 +26,6 @@ CONFIG = {
     'baseline_model': 'BaselineLSTM',
     'feature_extractor_type': 'ExtractorCNN',
     'RUL_regressor_type': 'RegressorMLP',
-    'feature_dim': 64,
 
     # baseline模型参数
     'BaselineMLP_params': {
@@ -51,13 +50,14 @@ CONFIG = {
     },
 
     # 领域泛化模型参数
+    'feature_dim': 320,
     'ExtractorCNN_params': {
-        'conv_channels': [32, 64, 96, 128],  # 卷积层输出通道数
+        'conv_channels': [64, 128, 192, 256],  # 卷积层输出通道数
         'kernel_size': 5,  # 卷积核大小
         'dropout': 0.1,
     },
     'RegressorMLP_params': {
-        'hidden_dims': [16],
+        'hidden_dims': [128, 32],
         'dropout': 0.1,
     },
     'DiscriminatorMLP_params': {
@@ -71,7 +71,7 @@ CONFIG = {
 
     # 训练部分
     'batch_size': 128,
-    'num_epochs': 10,
+    'num_epochs': 100,
     'learning_rate': 1e-3,
     'train_ratio': 0.8,
     'manual_seed': 42,
@@ -98,10 +98,10 @@ CONFIG = {
     },
 
     # 领域泛化部分
-    'domain_alignment': False,
+    'domain_alignment': True,
     'alignment_params': {
         'loss': 'MMD',
-        'tradeoff': 1.0,
+        'tradeoff': 5.0, # 不宜设置过大，会导致只优化alignment loss，RUL loss不下降
     },
 
     'domain_discrimination': False,

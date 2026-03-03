@@ -14,16 +14,23 @@ class EngineRegressorMLP(nn.Module):
             nn.LeakyReLU(inplace=True),
             nn.Dropout(dropout)
             )
-
+        
         self.layer2 = nn.Sequential(
-            nn.BatchNorm1d(hidden_dims[0]),
-            nn.Linear(hidden_dims[0], output_channels)
+            nn.Linear(hidden_dims[0], hidden_dims[1]),
+            nn.LeakyReLU(inplace=True),
+            nn.Dropout(dropout)
+            )
+
+        self.layer3 = nn.Sequential(
+            nn.BatchNorm1d(hidden_dims[1]),
+            nn.Linear(hidden_dims[1], output_channels)
             )
 
     def forward(self, x):
         # x shape: [batch, features]
         x = self.layer1(x) # [batch, hidden_dims[0]]
-        x = self.layer2(x) # [batch, output_channels]
+        x = self.layer2(x) # [batch, hidden_dims[1]]
+        x = self.layer3(x) # [batch, output_channels]
 
         return x
 

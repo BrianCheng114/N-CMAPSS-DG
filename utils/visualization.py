@@ -87,7 +87,7 @@ class EngineVisualizer:
 
         # plt.show()
 
-    def plot_loss_curves(self, train_losses, val_losses, save_path=None):
+    def plot_loss_curves(self, loss_list, legend_list, save_path=None):
         """
         绘制训练和验证损失曲线
         Args:
@@ -96,10 +96,11 @@ class EngineVisualizer:
             save_path: 图片保存路径
         """
         plt.figure(figsize=(8, 4))
-        plt.plot(train_losses, label='Training Loss')
-        plt.plot(val_losses, label='Validation Loss')
+        for loss, legend in zip(loss_list, legend_list):
+            plt.plot(loss, label=legend)
+
         plt.xlabel('Epoch')
-        plt.ylabel('MSE Loss')
+        plt.ylabel('Loss')
         plt.title('Training and Validation Loss')
         plt.legend()
         plt.grid(True)

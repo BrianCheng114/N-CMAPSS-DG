@@ -12,14 +12,14 @@ class EngineExtractorCNN(nn.Module):
         self.layer1 = nn.Sequential(
             nn.BatchNorm1d(input_channels),
             nn.Conv1d(input_channels, conv_channels[0], kernel_size, padding='same'),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Dropout(dropout)
             )
 
         self.layer2 = nn.Sequential(
             nn.BatchNorm1d(conv_channels[0]),
             nn.Conv1d(conv_channels[0], conv_channels[1], kernel_size, padding='same'),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.MaxPool1d(kernel_size=2),
             nn.Dropout(dropout)
             )
@@ -27,7 +27,7 @@ class EngineExtractorCNN(nn.Module):
         self.layer3 = nn.Sequential(
             nn.BatchNorm1d(conv_channels[1]),
             nn.Conv1d(conv_channels[1], conv_channels[2], kernel_size, padding='same'),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.MaxPool1d(kernel_size=2),
             nn.Dropout(dropout)
             )
@@ -35,18 +35,17 @@ class EngineExtractorCNN(nn.Module):
         self.layer4 = nn.Sequential(
             nn.BatchNorm1d(conv_channels[2]),
             nn.Conv1d(conv_channels[2], conv_channels[3], kernel_size, padding='same'),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.AdaptiveMaxPool1d(4),
             nn.Dropout(dropout)
             )
 
         self.layer5 = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(conv_channels[3] * 4, 64),
-            nn.ReLU(inplace=True),
+            nn.LeakyReLU(inplace=True),
             nn.Dropout(dropout),
-            nn.Linear(64, output_channels),
-            nn.ReLU()
+            nn.Linear(conv_channels[3] * 4, output_channels),
+            nn.LeakyReLU(inplace=True),
             )
 
     def forward(self, x):

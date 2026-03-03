@@ -296,7 +296,7 @@ class RULprediction:
 
             logging.info(f"Epoch {epoch+1:03d} | "
                 f"Train Loss: {total_loss/len(self.train_loader):.4f} | "
-                f"Val Loss: {val_loss/len(self.val_loader):.4f} |"
+                f"Val Loss: {val_loss/len(self.val_loader):.4f} | "
                 f"Time: {time.time() - start_time:.2f}s | "
                 f"Learning Rate: {self.optimizer.param_groups[0]['lr']:.6f}"
             )
@@ -319,6 +319,11 @@ class RULprediction:
         # 保存loss历史
         self.train_losses = train_losses
         self.val_losses = val_losses
+        self.train_RUL_losses = train_RUL_losses
+        if self.config['domain_alignment']:
+            self.train_alignment_losses = train_alignment_losses
+        if self.config['domain_discrimination']:
+            self.train_discrimination_losses = train_discrimination_losses
 
         # 保存模型和标准化器
         if self.config['domain_discrimination']:
@@ -403,10 +408,24 @@ class RULprediction:
 
         # 绘制损失函数变化曲线
         visualizer.plot_loss_curves(
-            self.train_losses,
-            self.val_losses,
+            [self.train_losses, self.val_losses], 
+            ['Train Loss', 'Val Loss'],
             save_path = os.path.join(self.config['save_path'], 'loss_curves.png')
         )
+
+        if self.config['domain_alignment']:
+            visualizer.plot_loss_curves(
+                [self.train_RUL_losses, self.train_alignment_losses], 
+                ['RUL Loss', 'Alignment Loss'],
+                save_path = os.path.join(self.config['save_path'], 'RUL_alignment_loss_curves.png')
+            )
+        if self.config['domain_discrimination']:
+            visualizer.plot_loss_curves(
+                [self.train_RUL_losses, self.train_discrimination_losses], 
+                ['RUL Loss', 'Discrimination Loss'],
+                save_path = os.path.join(self.config['save_path'], 'RUL_discrimination_loss_curves.png')
+            )
+
 
 if __name__ == "__main__":
     from utils.config import CONFIG
@@ -430,3 +449,29 @@ if __name__ == "__main__":
     trainer.train()
     trainer.test()
     trainer.plot()
+
+    CONFIG["alignment_params"]["loss"] = "L2"
+
+    CONFIG["save_path"] = os.path.join(CONFIG["save_root_path"], 
+                                    datetime.strftime(datetime.now(), "%m%d-%H%M%S"))
+    if CONFIG['domain_alignment']:
+        CONFIG["save_path"] += '-' + CONFIG["alignment_params"]["loss"]
+    if CONFIG['domain_discrimination']:
+        CONFIG["save_path"] += '-Discrimination'
+        
+    if not os.path.exists(CONFIG["save_path"]):
+        os.makedirs(CONFIG["save_path"])
+
+    setlogger(os.path.join(CONFIG["save_path"], "train.log"))
+    for k, v in CONFIG.items():
+        logging.info(f"{k}: {v}")
+
+    trainer1 = RULprediction(CONFIG)
+    trainer1.setup()
+    trainer1.train()
+    trainer1.test()
+    trainer1.plot()
+
+    import subprocess
+    time.sleep(1000)
+    subprocess.run(["rundll32.exe", "powrprof.dll,SetSuspendState", "0,0,0"], check=True)

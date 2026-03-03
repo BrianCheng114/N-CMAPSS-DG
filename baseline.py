@@ -253,8 +253,8 @@ class RULprediction:
 
         # 绘制损失函数变化曲线
         visualizer.plot_loss_curves(
-            self.train_losses,
-            self.val_losses,
+            [self.train_losses, self.val_losses],
+            ['Train Loss', 'Val Loss'],
             save_path = os.path.join(self.config['save_path'], 'loss_curves.png')
         )
 
